@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fed_xgboost_aml"
+version = "1.0.0"
+description = "Federated Learning with XGBoost and Flower (AML)"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.22.0",
+    "xgboost>=2.0.0",
+    "numpy>=1.21.0",
+    "scikit-learn>=1.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "RichardMuscat"
+
+[tool.flwr.app.components]
+serverapp = "server_app:app"
+clientapp = "client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 20
+fraction-train = 1.0
+fraction-evaluate = 1.0
+local-epochs = 185
+
+# run config
+run-tag = "Obj2"
+
+
+# Imbalance handling: ADASYN
+imbalance-strategy = "adasyn"
+sampling-strategy = 0.01
+
+# XGBoost parameters (from Altman et al.)
+params.objective = "binary:logistic"
+params.eta = 0.09                    # Learning rate
+params.max-depth = 10
+params.reg-lambda = 82.0
+params.colsample-bytree = 0.8
+params.subsample = 0.8
+params.tree-method = "hist"
+params.eval-metric = "auc"
+params.nthread = 16
+# params.scale-pos-weight = 4.5
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 4          # number of banks
+
