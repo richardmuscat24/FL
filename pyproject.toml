@@ -54,5 +54,5 @@ params.nthread = 16
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 4          # number of banks
+options.num-supernodes = 5          # number of banks
 

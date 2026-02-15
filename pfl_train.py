@@ -30,8 +30,8 @@ PARAMS = {
 # Data configuration
 IMBALANCE_STRATEGY = 'adasyn'
 SAMPLING_STRATEGY = 0.01
-NUM_CLIENTS = 4
-BANK_IDS = ['m741', 'm1818', 'm2310', 'm544']
+NUM_CLIENTS = 5
+BANK_IDS = ['1677', '4', '2', '146', '4870']
 
 def personalize_client(client_id, num_clients, global_model_path, params, epochs, imbalance_strategy, sampling_strategy, bank_id):
     """Fine-tune global model for one client and evaluate."""
@@ -44,6 +44,7 @@ def personalize_client(client_id, num_clients, global_model_path, params, epochs
     train_dmatrix, valid_dmatrix, num_train, num_val = load_data(
         client_id,
         num_clients,
+        bank_ids=BANK_IDS,  # Explicitly pass bank IDs
         imbalance_strategy=imbalance_strategy,
         sampling_strategy=sampling_strategy
     )
