@@ -192,8 +192,8 @@ def evaluate(msg: Message, context: Context) -> Message:
         if not file_exists:
             writer.writeheader()
 
-        bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
         
                 
         writer.writerow({

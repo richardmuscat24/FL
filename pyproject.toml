@@ -32,7 +32,7 @@ local-epochs = 185
 # local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "client_upsampling_default_params"
+run-tag = "client_upsampling_default_params_M"
 
 
 # Imbalance handling: ADASYN
@@ -70,5 +70,5 @@ params.scale-pos-weight = 4.5
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 5          # number of banks
+options.num-supernodes = 4          # number of banks
 
