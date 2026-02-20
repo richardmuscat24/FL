@@ -56,23 +56,172 @@ def train(msg: Message, context: Context) -> Message:
         imbalance_strategy=imbalance_strategy,
         sampling_strategy=sampling_strategy
     )
+
+    bank_ids = ['1677', '4', '2', '146', '4870'] #small
+    # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+
+    bank_id = bank_ids[partition_id]  # Map partition_id to bank_id
+
+    NUM_ROUNDS = {
+        "1677": 482,
+        "2": 580,
+        "4870": 185,
+        "4": 807,
+        "146": 314,
+        "m741": 717,
+        "m1818": 443,
+        "m2310": 333,
+        "m544": 381
+    }
     
     # Read training config
-    num_local_round = context.run_config["local-epochs"]
+    # num_local_round = context.run_config["local-epochs"]
     
+    num_local_round = NUM_ROUNDS[bank_id]  # Map partition_id to bank_id for rounds
+
     # Flatten config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
     params = cfg["params"]
+
     
-    # 🎯 OPTIONAL: Override params per client
-    # Uncomment to customize parameters for specific clients
-    # if partition_id == 0:  # Client 0 (m741)
-    #     params['eta'] = 0.1
-    #     params['max_depth'] = 12
-    # elif partition_id == 1:  # Client 1 (m1818)
-    #     params['eta'] = 0.08
-    #     params['max_depth'] = 8
-    # Add more conditions for other clients as needed
+    BANK_HYPERPARAMS = {
+        "1677": {
+            "max_depth": 10,
+            "eta": 0.019403187804511373,
+            "min_child_weight": 9,
+            "subsample": 0.5247519822601464,
+            "colsample_bytree": 0.8588953819457197,
+            "gamma": 0.0,  # Add if missing
+            "reg_lambda": 1.0,  # Add if missing
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "tree_method": "hist",
+            "seed": 42,
+            "nthread": 16
+        },
+        "2": {
+            "max_depth": 14,
+            "eta": 0.09133070167890314,
+            "min_child_weight": 5,
+            "subsample": 0.7830044552882892,
+            "colsample_bytree": 0.9233293259886008,
+            "gamma": 1.137754362329786,
+            "reg_lambda": 3.552725534174049,
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "tree_method": "hist",
+            "seed": 42,
+            "nthread": 16
+        },
+        "146": {
+            "max_depth": 10,
+            "eta": 0.07507182413546831,
+            "min_child_weight": 10,
+            "subsample": 0.9330880728874675,
+            "colsample_bytree": 0.9753571532049581,
+            "gamma": 1.4639878836228102,
+            "reg_lambda": 1.3372928062124765,
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "tree_method": "hist",
+            "seed": 42,
+            "nthread": 16
+        },
+        "4870": {
+            "max_depth": 10,
+            "eta": 0.09,
+            "min_child_weight": 1,
+            "subsample": 0.8,
+            "colsample_bytree": 0.8,
+            "gamma": 0.0,
+            "reg_lambda": 82.0,
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "tree_method": "hist",
+            "seed": 42,
+            "nthread": 16
+        },
+        "4": {
+            "max_depth": 10,
+            "eta": 0.0899212045236615,
+            "min_child_weight": 5,
+            "subsample": 0.823296768065808,
+            "colsample_bytree": 0.7352540496296012,
+            "gamma": 1.2070576863780036,
+            "reg_lambda": 0.13814964816593606,
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "tree_method": "hist",
+            "seed": 42,
+            "nthread": 16
+        },
+        "m741": {
+            "max_depth": 13,
+            "eta": 0.07234131022059624,
+            "min_child_weight": 8,
+            "subsample": 0.6092310343361069,
+            "colsample_bytree": 0.7467268297589102,
+            "gamma": 2.2855723450500065,
+            "reg_lambda": 70.9619275247569,
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "tree_method": "hist",
+            "seed": 42,
+            "nthread": 16
+        },
+        "m1818": {
+            "max_depth": 10,
+            "eta": 0.04527052030292707,
+            "min_child_weight": 9,
+            "subsample": 0.7646839077806987,
+            "colsample_bytree": 0.6873248697791162,
+            "gamma": 1.1758383388449716,
+            "reg_lambda": 14.174384184375949,
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "tree_method": "hist",
+            "seed": 42,
+            "nthread": 16
+        },
+        "m2310": {
+            "max_depth": 4,
+            "eta": 0.050821957961647915,
+            "min_child_weight": 2,
+            "subsample": 0.9947933960703935,
+            "colsample_bytree": 0.9314893414198531,
+            "gamma": 0.4846150141038674,
+            "reg_lambda": 1.3729365499483956,
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "tree_method": "hist",
+            "seed": 42,
+            "nthread": 16
+        },
+        "m544": {
+            "max_depth": 5,
+            "eta": 0.055377757618561646,
+            "min_child_weight": 2,
+            "subsample": 0.7591753462663356,
+            "colsample_bytree": 0.6691879991376378,
+            "gamma": 4.548133242047752,
+            "reg_lambda": 1.6346740590130946,
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "tree_method": "hist",
+            "seed": 42,
+            "nthread": 16
+        }
+    }
+    
+    # 🎯 Get bank-specific hyperparameters
+    
+    
+    if bank_id in BANK_HYPERPARAMS:
+        # Override params with bank-specific hyperparameters
+        params = BANK_HYPERPARAMS[bank_id]
+        print(f"  Using bank-specific params for Bank {bank_id}")
+    else:
+        print(f"  Warning: No specific params for Bank {bank_id}, using default params")
     
     print(f"  XGBoost params: {params}")
     

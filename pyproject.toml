@@ -32,7 +32,7 @@ fraction-evaluate = 1.0
 local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "small_optimized"
+run-tag = "small_specified_params"
 
 
 # Imbalance handling: ADASYN
@@ -70,5 +70,5 @@ params.nthread = 16
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 4          # number of banks
+options.num-supernodes = 5          # number of banks
 
