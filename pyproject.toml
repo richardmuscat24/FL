@@ -32,7 +32,7 @@ fraction-evaluate = 1.0
 local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "small_optimized"
+run-tag = "small_optimized_mean"
 
 
 # Imbalance handling: ADASYN
@@ -52,15 +52,30 @@ sampling-strategy = 0.01
 # params.scale-pos-weight = 4.5
 
 
-#XGBoost parameters - Small Optimized
+#XGBoost parameters - Small Optimized Median
+# params.objective = "binary:logistic"
+# params.eta = 0.0751
+# params.max-depth = 10
+# params.reg-lambda = 1.3373
+# params.colsample-bytree = 0.8233
+# params.subsample = 0.8000
+# params.min-child-weight = 5
+# params.gamma = 1.1378
+# params.tree-method = "hist"
+# params.eval-metric = "auc"
+# params.seed = 42
+# params.nthread = 16
+
+
+#XGBoost parameters - Small Optimized Median
 params.objective = "binary:logistic"
-params.eta = 0.0751
-params.max-depth = 10
-params.reg-lambda = 1.3373
-params.colsample-bytree = 0.8233
-params.subsample = 0.8000
-params.min-child-weight = 5
-params.gamma = 1.1378
+params.eta = 0.0720
+params.max-depth = 11
+params.reg-lambda = 17.6
+params.colsample-bytree = 0.8386
+params.subsample = 0.7728
+params.min-child-weight = 6
+params.gamma = 0.7622
 params.tree-method = "hist"
 params.eval-metric = "auc"
 params.seed = 42
@@ -70,5 +85,5 @@ params.nthread = 16
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 4          # number of banks
+options.num-supernodes = 5          # number of banks
 
