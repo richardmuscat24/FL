@@ -45,9 +45,9 @@ def train(msg: Message, context: Context) -> Message:
     print(f"\n{'='*60}")
     print(f"Client {partition_id} Training")
     print(f"  Imbalance strategy: {imbalance_strategy}")
-    if imbalance_strategy in ['smote', 'adasyn']:
-        print(f"  Sampling strategy: {sampling_strategy}")
-    print(f"{'='*60}\n")
+    # if imbalance_strategy in ['smote', 'adasyn']:
+    #     print(f"  Sampling strategy: {sampling_strategy}")
+    # print(f"{'='*60}\n")
     
     # Load data WITH imbalance handling
     train_dmatrix, _, num_train, _ = load_data(
@@ -63,6 +63,18 @@ def train(msg: Message, context: Context) -> Message:
     # Flatten config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
     params = cfg["params"]
+    
+    # 🎯 OPTIONAL: Override params per client
+    # Uncomment to customize parameters for specific clients
+    # if partition_id == 0:  # Client 0 (m741)
+    #     params['eta'] = 0.1
+    #     params['max_depth'] = 12
+    # elif partition_id == 1:  # Client 1 (m1818)
+    #     params['eta'] = 0.08
+    #     params['max_depth'] = 8
+    # Add more conditions for other clients as needed
+    
+    print(f"  XGBoost params: {params}")
     
     # Handle scale_pos_weight if using that strategy
     if imbalance_strategy == "scale_pos_weight":
@@ -180,8 +192,8 @@ def evaluate(msg: Message, context: Context) -> Message:
         if not file_exists:
             writer.writeheader()
 
-        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+        bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
         
                 
         writer.writerow({

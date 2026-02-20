@@ -28,10 +28,11 @@ clientapp = "client_app:app"
 num-server-rounds = 20
 fraction-train = 1.0
 fraction-evaluate = 1.0
-local-epochs = 185
+# local-epochs = 185
+local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "Obj2"
+run-tag = "small_optimized"
 
 
 # Imbalance handling: ADASYN
@@ -39,16 +40,31 @@ imbalance-strategy = "adasyn"
 sampling-strategy = 0.01
 
 # XGBoost parameters (from Altman et al.)
+# params.objective = "binary:logistic"
+# params.eta = 0.09                    # Learning rate
+# params.max-depth = 10
+# params.reg-lambda = 82.0
+# params.colsample-bytree = 0.8
+# params.subsample = 0.8
+# params.tree-method = "hist"
+# params.eval-metric = "auc"
+# params.nthread = 16
+# params.scale-pos-weight = 4.5
+
+
+#XGBoost parameters - Small Optimized
 params.objective = "binary:logistic"
-params.eta = 0.09                    # Learning rate
+params.eta = 0.0751
 params.max-depth = 10
-params.reg-lambda = 82.0
-params.colsample-bytree = 0.8
-params.subsample = 0.8
+params.reg-lambda = 1.3373
+params.colsample-bytree = 0.8233
+params.subsample = 0.8000
+params.min-child-weight = 5
+params.gamma = 1.1378
 params.tree-method = "hist"
 params.eval-metric = "auc"
+params.seed = 42
 params.nthread = 16
-# params.scale-pos-weight = 4.5
 
 [tool.flwr.federations]
 default = "local-simulation"

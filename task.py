@@ -18,6 +18,26 @@ if not logger.handlers:
     logger.addHandler(handler)
 
 
+SAMPLING_STRATEGIES = {
+    "1677": 0.05468166602085926,
+    "2": 0.2,
+    "4870": 0.09,
+    "4": 0.09,
+    "146": 0.0550474,
+    "m741": 0.021701533945381567,
+    "m1818": 0.017292752001369337,
+    "m2310": 0.032103571433416155,
+    "m544": 0.15755520301000245
+}
+
+def get_sampling_strategy(bank_id):
+    """Get bank-specific ADASYN sampling strategy"""
+    bank_key = str(bank_id)
+    if bank_key not in SAMPLING_STRATEGIES:
+        raise ValueError(f"No sampling strategy found for bank {bank_id}")
+    return SAMPLING_STRATEGIES[bank_key]
+
+
 def load_data(partition_id, num_partitions, 
               bank_ids=None,
               imbalance_strategy='none', 
@@ -38,8 +58,8 @@ def load_data(partition_id, num_partitions,
     
     # Default to your 5 banks if not specified
     if bank_ids is None:
-        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+        bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
     
     if partition_id >= len(bank_ids):
         raise ValueError(f"Invalid partition {partition_id}, max is {len(bank_ids)-1}")
@@ -82,6 +102,8 @@ def load_data(partition_id, num_partitions,
     
     original_train_size = len(y_train)
     original_class_dist = np.bincount(y_train)
+
+    sampling_strategy = get_sampling_strategy(bank_id)
     
     try:
         if imbalance_strategy == 'smote':
