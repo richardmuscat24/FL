@@ -57,8 +57,8 @@ def train(msg: Message, context: Context) -> Message:
         sampling_strategy=sampling_strategy
     )
 
-    bank_ids = ['1677', '4', '2', '146', '4870'] #small
-    # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+    # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+    bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
 
     bank_id = bank_ids[partition_id]  # Map partition_id to bank_id
 
@@ -78,6 +78,7 @@ def train(msg: Message, context: Context) -> Message:
     # num_local_round = context.run_config["local-epochs"]
     
     num_local_round = NUM_ROUNDS[bank_id]  # Map partition_id to bank_id for rounds
+    # num_local_round = 50
 
     # Flatten config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
@@ -341,8 +342,8 @@ def evaluate(msg: Message, context: Context) -> Message:
         if not file_exists:
             writer.writeheader()
 
-        bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
         
                 
         writer.writerow({

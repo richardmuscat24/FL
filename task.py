@@ -1,5 +1,5 @@
 """Data loading and utilities for federated XGBoost"""
-from imblearn.over_sampling import ADASYN, SMOTE
+from imblearn.over_sampling import ADASYN, SMOTE, RandomOverSampler
 import xgboost as xgb
 import numpy as np
 from pathlib import Path
@@ -49,17 +49,20 @@ def load_data(partition_id, num_partitions,
         partition_id: Client ID (0-indexed)
         num_partitions: Total number of partitions
         bank_ids: List of bank IDs (optional, uses default if None)
-        imbalance_strategy: 'none', 'smote', 'adasyn', or 'scale_pos_weight'
-        sampling_strategy: Sampling ratio for SMOTE/ADASYN
+        imbalance_strategy: 'none', 'smote', 'adasyn', 'resample', or 'scale_pos_weight'
+        sampling_strategy: Sampling ratio for SMOTE/ADASYN/RandomOverSampler
         
     Returns:
         train_dmatrix, valid_dmatrix, num_train, num_val
     """
     
+    # 🔧 HARDCODE: Force resample strategy (uncomment to override config)
+    # imbalance_strategy = 'resample'
+    
     # Default to your 5 banks if not specified
     if bank_ids is None:
-        bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
     
     if partition_id >= len(bank_ids):
         raise ValueError(f"Invalid partition {partition_id}, max is {len(bank_ids)-1}")
@@ -103,7 +106,7 @@ def load_data(partition_id, num_partitions,
     original_train_size = len(y_train)
     original_class_dist = np.bincount(y_train)
 
-    sampling_strategy = get_sampling_strategy(bank_id)
+    # sampling_strategy = get_sampling_strategy(bank_id)
     
     try:
         if imbalance_strategy == 'smote':
@@ -116,6 +119,19 @@ def load_data(partition_id, num_partitions,
                 sampling_strategy=sampling_strategy
             )
             X_train, y_train = smote.fit_resample(X_train, y_train)
+            
+            new_class_dist = np.bincount(y_train)
+            logger.info(f"    After:  {len(y_train)} samples, dist={new_class_dist}")
+        
+        elif imbalance_strategy == 'resample':
+            logger.info(f"  Applying RandomOverSampler (sampling_strategy={sampling_strategy})")
+            logger.info(f"    Before: {original_train_size} samples, dist={original_class_dist}")
+            
+            ros = RandomOverSampler(
+                random_state=42,
+                sampling_strategy=sampling_strategy
+            )
+            X_train, y_train = ros.fit_resample(X_train, y_train)
             
             new_class_dist = np.bincount(y_train)
             logger.info(f"    After:  {len(y_train)} samples, dist={new_class_dist}")
