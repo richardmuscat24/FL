@@ -30,6 +30,8 @@ SAMPLING_STRATEGIES = {
     "m544": 0.15755520301000245
 }
 
+
+
 def get_sampling_strategy(bank_id):
     """Get bank-specific ADASYN sampling strategy"""
     bank_key = str(bank_id)
@@ -103,7 +105,7 @@ def load_data(partition_id, num_partitions,
     original_train_size = len(y_train)
     original_class_dist = np.bincount(y_train)
 
-    sampling_strategy = get_sampling_strategy(bank_id)
+    # sampling_strategy = get_sampling_strategy(bank_id)
     
     try:
         if imbalance_strategy == 'smote':
