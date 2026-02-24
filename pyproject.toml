@@ -32,12 +32,12 @@ fraction-evaluate = 1.0
 local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "resample_spec_20"
+run-tag = "spec_20"
 
 
 # Imbalance handling: ADASYN
 imbalance-strategy = "adasyn"
-sampling-strategy = 0.008
+sampling-strategy = 0.09
 
 # XGBoost parameters (from Altman et al.)
 # params.objective = "binary:logistic"
