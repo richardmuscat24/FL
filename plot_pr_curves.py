@@ -130,8 +130,11 @@ def plot_experiment(file_list, output_name=None, title_suffix=""):
     ax.set_xlim([0, 1])
     ax.set_ylim([0, 1])
     
-    # Add diagonal reference line
-    ax.plot([0, 1], [0.5, 0.5], 'k--', alpha=0.3, linewidth=1)
+    # Add baseline: For imbalanced data, the no-skill baseline is the positive class ratio
+    # Since we don't have that info here, we show a reference line
+    # A better baseline would be: horizontal line at (positive_class_ratio)
+    # For now, just a visual reference
+    ax.axhline(y=0.5, color='gray', linestyle='--', alpha=0.3, linewidth=1, label='Reference (0.5)')
     
     # Save figure
     if output_name is None:
