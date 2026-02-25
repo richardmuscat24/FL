@@ -5,7 +5,7 @@ import xgboost as xgb
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
-from sklearn.metrics import f1_score, precision_recall_curve, roc_auc_score
+from sklearn.metrics import f1_score, precision_recall_curve, roc_auc_score, precision_score, recall_score
 from task import load_data, replace_keys
 import csv
 from pathlib import Path
@@ -155,10 +155,14 @@ def evaluate(msg: Message, context: Context) -> Message:
     best_idx = np.argmax(f1s)
     f1_optimal = f1s[best_idx]
     best_thr = thr[best_idx]
+    precision_optimal = prec[best_idx]
+    recall_optimal = rec[best_idx]
     
-    # Also calculate F1 at 0.5 threshold for comparison
+    # Also calculate metrics at 0.5 threshold for comparison
     y_pred_05 = (y_pred_proba >= 0.5).astype(int)
     f1_05 = f1_score(y_true, y_pred_05, zero_division=0)
+    precision_05 = precision_score(y_true, y_pred_05, zero_division=0)
+    recall_05 = recall_score(y_true, y_pred_05, zero_division=0)
     
     server_round = msg.content["config"]["server-round"]
     
@@ -166,6 +170,28 @@ def evaluate(msg: Message, context: Context) -> Message:
           f"AUC: {auc:.4f} | F1(opt): {f1_optimal:.4f} @ {best_thr:.3f} | "
           f"F1(0.5): {f1_05:.4f} | "
           f"pred∈[{y_pred_proba.min():.3f},{y_pred_proba.max():.3f}]")
+    
+    # ========================================
+    # 💾 SAVE PR CURVE DATA (Final Round Only)
+    # ========================================
+    num_server_rounds = context.run_config.get("num-server-rounds", 20)
+    if server_round == num_server_rounds:
+        metrics_dir = Path("metrics3")
+        metrics_dir.mkdir(exist_ok=True)
+        
+        run_tag = context.run_config.get("run-tag", "")
+        imbalance_strategy = context.run_config.get("imbalance-strategy", "none")
+        imbalance_sampling = context.run_config.get("sampling-strategy", "none")
+        
+        bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium
+        bank_id = bank_ids[partition_id]
+        
+        # Save PR curve data
+        pr_file = metrics_dir / f"pr_curve_{run_tag}_{bank_id}_{imbalance_strategy}_{imbalance_sampling}.npz"
+        np.savez(pr_file, precision=prec, recall=rec, thresholds=thr, 
+                 optimal_threshold=best_thr, f1_scores=f1s)
+        print(f"  💾 Saved PR curve data to {pr_file}")
     
     # ========================================
     # 💾 SAVE METRICS TO CSV
@@ -185,7 +211,8 @@ def evaluate(msg: Message, context: Context) -> Message:
     
     with open(csv_file, 'a', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=[
-            'round','client_id', 'f1_05', 'f1_optimal','auc', 
+            'round', 'client_id', 'f1_05', 'precision_05', 'recall_05',
+            'f1_optimal', 'precision_optimal', 'recall_optimal', 'auc', 
             'best_threshold', 'num_examples', 'imbalance_strategy', 'imbalance_sampling'
         ])
         
@@ -200,7 +227,11 @@ def evaluate(msg: Message, context: Context) -> Message:
             'round': server_round,
             'client_id': bank_ids[partition_id],
             'f1_05': float(f1_05),
+            'precision_05': float(precision_05),
+            'recall_05': float(recall_05),
             'f1_optimal': float(f1_optimal),
+            'precision_optimal': float(precision_optimal),
+            'recall_optimal': float(recall_optimal),
             'auc': float(auc),
             'best_threshold': float(best_thr),
             'num_examples': num_val,

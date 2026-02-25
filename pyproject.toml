@@ -32,7 +32,7 @@ local-epochs = 185
 # local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "client_upsampling_default_params"
+run-tag = "client_upsampling_default_params_extm_pr"
 
 
 # Imbalance handling: ADASYN
