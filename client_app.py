@@ -187,8 +187,8 @@ def evaluate(msg: Message, context: Context) -> Message:
         imbalance_strategy = context.run_config.get("imbalance-strategy", "none")
         imbalance_sampling = context.run_config.get("sampling-strategy", "none")
         
-        bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium
+        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium
         bank_id = bank_ids[partition_id]
         
         # Clean up sampling for filename: if 0, use "client_specific"
@@ -227,8 +227,8 @@ def evaluate(msg: Message, context: Context) -> Message:
         if not file_exists:
             writer.writeheader()
 
-        bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
         
                 
         writer.writerow({

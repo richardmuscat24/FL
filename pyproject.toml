@@ -32,7 +32,7 @@ fraction-evaluate = 1.0
 local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "client_upsampling_mean_params"  # e.g., "client_upsampling_centralized", "client_upsampling_federated", "client_specific_upsampling_centralized"
+run-tag = "client_upsampling_median_params_m"  # e.g., "client_upsampling_centralized", "client_upsampling_federated", "client_specific_upsampling_centralized"
 
 
 # Imbalance handling: ADASYN
@@ -49,7 +49,7 @@ sampling-strategy = 0
 # params.tree-method = "hist"
 # params.eval-metric = "auc"
 # params.nthread = 16
-# params.scale-pos-weight = 4.5
+# # params.scale-pos-weight = 4.5
 
 
 # #XGBoost parameters - Small Optimized Median
@@ -68,23 +68,55 @@ sampling-strategy = 0
 
 
 # XGBoost parameters - Small Optimized Mean
+# params.objective = "binary:logistic"
+# params.eta = 0.0720
+# params.max-depth = 11
+# params.reg-lambda = 17.6
+# params.colsample-bytree = 0.8386
+# params.subsample = 0.7728
+# params.min-child-weight = 6
+# params.gamma = 0.7622
+# params.tree-method = "hist"
+# params.eval-metric = "auc"
+# params.seed = 42
+# params.nthread = 16
+
+
+#XGBoost parameters medium - median optimized
 params.objective = "binary:logistic"
-params.eta = 0.0720
-params.max-depth = 11
-params.reg-lambda = 17.6
-params.colsample-bytree = 0.8386
-params.subsample = 0.7728
-params.min-child-weight = 6
-params.gamma = 0.7622
+params.eta = 0.0603
+params.max-depth = 10
+params.reg-lambda = 7.7710
+params.colsample-bytree = 0.7079
+params.subsample = 0.7619
+params.min-child-weight = 5
+params.gamma = 1.6447
 params.tree-method = "hist"
 params.eval-metric = "auc"
-params.seed = 42
 params.nthread = 16
+params.seed = 42
+
+
+#XGBoost parameters medium - mean optimized
+# params.objective = "binary:logistic"
+# params.eta = 0.0561
+# params.max-depth = 8
+# params.reg-lambda = 22.04
+# params.colsample-bytree = 0.7587
+# params.subsample = 0.7820
+# params.min-child-weight = 5
+# params.gamma = 2.1233
+# params.tree-method = "hist"
+# params.eval-metric = "auc"
+# params.nthread = 16
+# params.seed = 42
+
+
 
 
 [tool.flwr.federations]
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 5          # number of banks
+options.num-supernodes = 4          # number of banks
 
