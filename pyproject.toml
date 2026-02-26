@@ -32,12 +32,12 @@ local-epochs = 185
 # local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "client_upsampling_default_params_extm_pr"
+run-tag = "client_upsampling_centralized_params"  # e.g., "client_upsampling_centralized", "client_upsampling_federated", "client_specific_upsampling_centralized"
 
 
 # Imbalance handling: ADASYN
 imbalance-strategy = "adasyn"
-sampling-strategy = 0.01
+sampling-strategy = 0
 
 # XGBoost parameters (from Altman et al.)
 params.objective = "binary:logistic"

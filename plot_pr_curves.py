@@ -31,6 +31,7 @@ def load_pr_file(pr_file):
 def extract_metadata(filename):
     """Extract experiment metadata from filename"""
     # Format: pr_curve_{run_tag}_{bank_id}_{strategy}_{sampling}.npz
+    # Or: pr_curve_{run_tag}_{bank_id}_{strategy}_client_specific.npz (when sampling=0)
     stem = Path(filename).stem
     parts = stem.split('_')
     
@@ -41,7 +42,15 @@ def extract_metadata(filename):
     bank_id = parts[-3]  # third from end
     strategy = parts[-2]  # second from end
     sampling = parts[-1]  # last
-    run_tag = '_'.join(parts[2:-3])  # everything between pr_curve and bank_id
+    
+    # Handle "client_specific" case (when multiple words at end)
+    if sampling == "specific" and len(parts) > 5 and parts[-2] == "client":
+        strategy = parts[-3]
+        bank_id = parts[-4]
+        sampling = "client_specific"
+        run_tag = '_'.join(parts[2:-4])
+    else:
+        run_tag = '_'.join(parts[2:-3])  # everything between pr_curve and bank_id
     
     return {
         'run_tag': run_tag,
@@ -72,6 +81,23 @@ def group_pr_files(metrics_dir="metrics3"):
             })
     
     return experiments
+
+
+def make_output_name(run_tag, strategy, sampling):
+    """Generate clean output filename, omitting sampling if it's 0 or client_specific"""
+    # If sampling is 0 or "client_specific", omit it from filename
+    if sampling in ['0', '0.0', 'client_specific']:
+        return f"pr_curves_{run_tag}_{strategy}_client_specific.png"
+    else:
+        return f"pr_curves_{run_tag}_{strategy}_{sampling}.png"
+
+
+def make_title_suffix(run_tag, strategy, sampling):
+    """Generate clean title suffix, showing 'client-specific' when sampling is 0"""
+    if sampling in ['0', '0.0', 'client_specific']:
+        return f"\n{run_tag} | {strategy} | client-specific sampling"
+    else:
+        return f"\n{run_tag} | {strategy} | sampling={sampling}"
 
 
 def plot_experiment(file_list, output_name=None, title_suffix=""):
@@ -165,7 +191,10 @@ def list_experiments(metrics_dir="metrics3"):
         run_tag, strategy, sampling = exp_key
         bank_ids = [f['bank_id'] for f in files]
         
-        print(f"{idx}. {run_tag} | {strategy} | sampling={sampling}")
+        # Display cleaner sampling info
+        display_sampling = "client-specific" if sampling in ['0', '0.0', 'client_specific'] else sampling
+        
+        print(f"{idx}. {run_tag} | {strategy} | sampling={display_sampling}")
         print(f"   Banks: {', '.join(sorted(bank_ids))}")
         print(f"   Files: {len(files)}")
         
@@ -211,6 +240,7 @@ if __name__ == "__main__":
     parser.add_argument('--list', '-l', action='store_true', help='List all available experiments')
     parser.add_argument('--all', '-a', action='store_true', help='Plot all experiments')
     parser.add_argument('--experiment', '-e', type=int, help='Plot specific experiment number (use --list to see numbers)')
+    parser.add_argument('--output', '-o', type=str, help='Override output filename (e.g., my_plot.png)')
     
     args = parser.parse_args()
     
@@ -232,12 +262,16 @@ if __name__ == "__main__":
         else:
             for exp_key, files in experiments.items():
                 run_tag, strategy, sampling = exp_key
+                
+                # Use helper functions for clean naming
+                display_sampling = "client-specific" if sampling in ['0', '0.0', 'client_specific'] else sampling
+                
                 print(f"\n{'='*70}")
-                print(f"Plotting: {run_tag} | {strategy} | sampling={sampling}")
+                print(f"Plotting: {run_tag} | {strategy} | sampling={display_sampling}")
                 print(f"{'='*70}")
                 
-                title_suffix = f"\n{run_tag} | {strategy} | sampling={sampling}"
-                output_name = f"pr_curves_{run_tag}_{strategy}_{sampling}.png"
+                title_suffix = make_title_suffix(run_tag, strategy, sampling)
+                output_name = make_output_name(run_tag, strategy, sampling)
                 
                 plot_experiment(files, output_name=output_name, title_suffix=title_suffix)
     
@@ -254,12 +288,20 @@ if __name__ == "__main__":
         
         exp = exp_list[args.experiment - 1]
         
+        display_sampling = "client-specific" if exp['sampling'] in ['0', '0.0', 'client_specific'] else exp['sampling']
+        
         print(f"\n{'='*70}")
-        print(f"Plotting experiment {args.experiment}: {exp['run_tag']} | {exp['strategy']} | {exp['sampling']}")
+        print(f"Plotting experiment {args.experiment}: {exp['run_tag']} | {exp['strategy']} | {display_sampling}")
         print(f"{'='*70}")
         
-        title_suffix = f"\n{exp['run_tag']} | {exp['strategy']} | sampling={exp['sampling']}"
-        output_name = f"pr_curves_{exp['run_tag']}_{exp['strategy']}_{exp['sampling']}.png"
+        title_suffix = make_title_suffix(exp['run_tag'], exp['strategy'], exp['sampling'])
+        
+        # Use custom output name if provided, otherwise generate
+        if args.output:
+            output_name = args.output
+            print(f"📝 Using custom output name: {output_name}")
+        else:
+            output_name = make_output_name(exp['run_tag'], exp['strategy'], exp['sampling'])
         
         plot_experiment(exp['files'], output_name=output_name, title_suffix=title_suffix)
     
@@ -269,7 +311,8 @@ if __name__ == "__main__":
         
         if exp_list:
             print("💡 Usage:")
-            print("   python plot_pr_curves.py --all                    # Plot all experiments")
-            print("   python plot_pr_curves.py -e 1                     # Plot experiment 1")
-            print("   python plot_pr_curves.py -f metrics3/pr_curve... # Plot specific file")
+            print("   python plot_pr_curves.py --all                          # Plot all experiments")
+            print("   python plot_pr_curves.py -e 1                           # Plot experiment 1")
+            print("   python plot_pr_curves.py -e 1 -o my_custom_plot.png    # Plot with custom name")
+            print("   python plot_pr_curves.py -f metrics3/pr_curve...npz    # Plot specific file")
 

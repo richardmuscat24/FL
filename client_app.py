@@ -5,7 +5,7 @@ import xgboost as xgb
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
-from sklearn.metrics import f1_score, precision_recall_curve, roc_auc_score, precision_score, recall_score
+from sklearn.metrics import f1_score, precision_recall_curve, roc_auc_score, precision_score, recall_score, auc
 from task import load_data, replace_keys
 import csv
 from pathlib import Path
@@ -146,11 +146,15 @@ def evaluate(msg: Message, context: Context) -> Message:
     y_true = valid_dmatrix.get_label()
     y_pred_proba = bst.predict(valid_dmatrix)
     
-    # Calculate AUC
-    auc = roc_auc_score(y_true, y_pred_proba)
+    # Calculate ROC AUC
+    roc_auc = roc_auc_score(y_true, y_pred_proba)
     
     # Find F1-optimal threshold
     prec, rec, thr = precision_recall_curve(y_true, y_pred_proba)
+    
+    # Calculate AUC-PR (area under precision-recall curve)
+    auc_pr = auc(rec, prec)
+    
     f1s = 2 * prec * rec / (prec + rec + 1e-12)
     best_idx = np.argmax(f1s)
     f1_optimal = f1s[best_idx]
@@ -167,8 +171,8 @@ def evaluate(msg: Message, context: Context) -> Message:
     server_round = msg.content["config"]["server-round"]
     
     print(f"Client {partition_id} | Round {server_round:2d} | "
-          f"AUC: {auc:.4f} | F1(opt): {f1_optimal:.4f} @ {best_thr:.3f} | "
-          f"F1(0.5): {f1_05:.4f} | "
+          f"ROC-AUC: {roc_auc:.4f} | AUC-PR: {auc_pr:.4f} | "
+          f"F1(opt): {f1_optimal:.4f} @ {best_thr:.3f} | F1(0.5): {f1_05:.4f} | "
           f"pred∈[{y_pred_proba.min():.3f},{y_pred_proba.max():.3f}]")
     
     # ========================================
@@ -187,8 +191,11 @@ def evaluate(msg: Message, context: Context) -> Message:
         # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium
         bank_id = bank_ids[partition_id]
         
+        # Clean up sampling for filename: if 0, use "client_specific"
+        sampling_str = "client_specific" if str(imbalance_sampling) == "0" else str(imbalance_sampling)
+        
         # Save PR curve data
-        pr_file = metrics_dir / f"pr_curve_{run_tag}_{bank_id}_{imbalance_strategy}_{imbalance_sampling}.npz"
+        pr_file = metrics_dir / f"pr_curve_{run_tag}_{bank_id}_{imbalance_strategy}_{sampling_str}.npz"
         np.savez(pr_file, precision=prec, recall=rec, thresholds=thr, 
                  optimal_threshold=best_thr, f1_scores=f1s)
         print(f"  💾 Saved PR curve data to {pr_file}")
@@ -212,8 +219,9 @@ def evaluate(msg: Message, context: Context) -> Message:
     with open(csv_file, 'a', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=[
             'round', 'client_id', 'f1_05', 'precision_05', 'recall_05',
-            'f1_optimal', 'precision_optimal', 'recall_optimal', 'auc', 
-            'best_threshold', 'num_examples', 'imbalance_strategy', 'imbalance_sampling'
+            'f1_optimal', 'precision_optimal', 'recall_optimal', 
+            'roc_auc', 'auc_pr', 'best_threshold', 'num_examples', 
+            'imbalance_strategy', 'imbalance_sampling'
         ])
         
         if not file_exists:
@@ -232,7 +240,8 @@ def evaluate(msg: Message, context: Context) -> Message:
             'f1_optimal': float(f1_optimal),
             'precision_optimal': float(precision_optimal),
             'recall_optimal': float(recall_optimal),
-            'auc': float(auc),
+            'roc_auc': float(roc_auc),
+            'auc_pr': float(auc_pr),
             'best_threshold': float(best_thr),
             'num_examples': num_val,
             'imbalance_strategy': imbalance_strategy,
@@ -241,7 +250,8 @@ def evaluate(msg: Message, context: Context) -> Message:
     
     # Construct reply message
     metrics = {
-        "auc": float(auc), 
+        "roc_auc": float(roc_auc),
+        "auc_pr": float(auc_pr),
         "f1_optimal": float(f1_optimal),
         "f1_05": float(f1_05),
         "best_threshold": float(best_thr),
