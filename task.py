@@ -103,7 +103,7 @@ def load_data(partition_id, num_partitions,
     original_train_size = len(y_train)
     original_class_dist = np.bincount(y_train)
 
-    # sampling_strategy = get_sampling_strategy(bank_id)
+    sampling_strategy = get_sampling_strategy(bank_id)
     
     try:
         if imbalance_strategy == 'smote':
