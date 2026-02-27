@@ -32,12 +32,12 @@ fraction-evaluate = 1.0
 local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "common_upsampling_client_params_m"  # e.g., "client_upsampling_centralized", "client_upsampling_federated", "client_specific_upsampling_centralized"
+run-tag = "common_upsampling_client_params_s"  # e.g., "client_upsampling_centralized", "client_upsampling_federated", "client_specific_upsampling_centralized"
 
 
 # Imbalance handling: ADASYN
 imbalance-strategy = "adasyn"
-sampling-strategy = 0.09
+sampling-strategy = 0.009
 
 # XGBoost parameters (from Altman et al.)
 params.objective = "binary:logistic"
@@ -118,5 +118,5 @@ params.nthread = 16
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 4          # number of banks
+options.num-supernodes = 5          # number of banks
 
