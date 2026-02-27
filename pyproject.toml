@@ -32,7 +32,7 @@ fraction-evaluate = 1.0
 local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "client_upsampling_median_params_m"  # e.g., "client_upsampling_centralized", "client_upsampling_federated", "client_specific_upsampling_centralized"
+run-tag = "client_upsampling_client_params_m"  # e.g., "client_upsampling_centralized", "client_upsampling_federated", "client_specific_upsampling_centralized"
 
 
 # Imbalance handling: ADASYN
@@ -40,15 +40,15 @@ imbalance-strategy = "adasyn"
 sampling-strategy = 0
 
 # XGBoost parameters (from Altman et al.)
-# params.objective = "binary:logistic"
+params.objective = "binary:logistic"
 # params.eta = 0.09                    # Learning rate
 # params.max-depth = 10
 # params.reg-lambda = 82.0
 # params.colsample-bytree = 0.8
 # params.subsample = 0.8
-# params.tree-method = "hist"
-# params.eval-metric = "auc"
-# params.nthread = 16
+params.tree-method = "hist"
+params.eval-metric = "auc"
+params.nthread = 16
 # # params.scale-pos-weight = 4.5
 
 
