@@ -50,6 +50,11 @@ def main(grid: Grid, context: Context) -> None:
     print("Training Complete!")
     print("="*60)
     
+    # Get run tag for filename
+    run_tag = context.run_config.get("run-tag", "default")
+    imbalance_strategy = context.run_config.get("imbalance-strategy", "none")
+    imbalance_sampling = context.run_config.get("sampling-strategy", "none")
+    
     # Check if result has arrays
     if result and hasattr(result, 'arrays') and result.arrays:
         # Try to get the model - handle different key formats
@@ -72,10 +77,11 @@ def main(grid: Grid, context: Context) -> None:
             bst = xgb.Booster(params=params)
             bst.load_model(global_model)
             
-            # Save model
-            print("Saving final model to disk...")
-            bst.save_model("final_model.json")
-            print("✓ Model saved to: final_model.json")
+            # Save model with run tag prefix
+            model_filename = f"final_model_{run_tag}_{imbalance_strategy}_{imbalance_sampling}.json"
+            print(f"Saving final model to disk...")
+            bst.save_model(model_filename)
+            print(f"✓ Model saved to: {model_filename}")
         except Exception as e:
             print(f"Warning: Could not save model: {e}")
             print(f"Result arrays keys: {list(result.arrays.keys()) if result.arrays else 'None'}")

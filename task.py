@@ -58,8 +58,8 @@ def load_data(partition_id, num_partitions,
     
     # Default to your 5 banks if not specified
     if bank_ids is None:
-        bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
     
     if partition_id >= len(bank_ids):
         raise ValueError(f"Invalid partition {partition_id}, max is {len(bank_ids)-1}")
@@ -103,7 +103,7 @@ def load_data(partition_id, num_partitions,
     original_train_size = len(y_train)
     original_class_dist = np.bincount(y_train)
 
-    sampling_strategy = get_sampling_strategy(bank_id)
+    # sampling_strategy = get_sampling_strategy(bank_id)
     
     try:
         if imbalance_strategy == 'smote':

@@ -57,8 +57,8 @@ def train(msg: Message, context: Context) -> Message:
         sampling_strategy=sampling_strategy
     )
 
-    bank_ids = ['1677', '4', '2', '146', '4870'] #small
-    # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+    # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+    bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
 
     bank_id = bank_ids[partition_id]  # Map partition_id to bank_id
 
@@ -335,8 +335,8 @@ def evaluate(msg: Message, context: Context) -> Message:
         imbalance_strategy = context.run_config.get("imbalance-strategy", "none")
         imbalance_sampling = context.run_config.get("sampling-strategy", "none")
         
-        bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium
+        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium
         bank_id = bank_ids[partition_id]
         
         # Clean up sampling for filename: if 0, use "client_specific"
@@ -347,6 +347,13 @@ def evaluate(msg: Message, context: Context) -> Message:
         np.savez(pr_file, precision=prec, recall=rec, thresholds=thr, 
                  optimal_threshold=best_thr, f1_scores=f1s)
         print(f"  💾 Saved PR curve data to {pr_file}")
+
+        pred_file = metrics_dir / f"predictions_{run_tag}_{bank_id}_{imbalance_strategy}_{sampling_str}.npz"
+        np.savez(pred_file, 
+                    y_test=y_true,        # ground truth — same as local
+                    y_prob=y_pred_proba,  # federated model probabilities
+                    optimal_threshold=best_thr)
+        print(f"  💾 Saved predictions to {pred_file}")
     
     # ========================================
     # 💾 SAVE METRICS TO CSV
@@ -375,8 +382,8 @@ def evaluate(msg: Message, context: Context) -> Message:
         if not file_exists:
             writer.writeheader()
 
-        bank_ids = ['1677', '4', '2', '146', '4870'] #small
-        # bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
+        # bank_ids = ['1677', '4', '2', '146', '4870'] #small
+        bank_ids = ['m741', 'm1818', 'm2310','m544'] #medium 
         
                 
         writer.writerow({
