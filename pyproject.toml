@@ -32,12 +32,12 @@ fraction-evaluate = 1.0
 local-epochs = 500    # small_optimized
 
 # run config
-run-tag = "client_upsampling_median_params_m"  # e.g., "client_upsampling_centralized", "client_upsampling_federated", "client_specific_upsampling_centralized"
+run-tag = "common_upsampling_mean_params_m"  # e.g., "client_upsampling_centralized", "client_upsampling_federated", "client_specific_upsampling_centralized"
 
 
 # Imbalance handling: ADASYN
 imbalance-strategy = "adasyn"
-sampling-strategy = 0
+sampling-strategy = 0.01
 
 # XGBoost parameters (from Altman et al.)
 # params.objective = "binary:logistic"
@@ -83,33 +83,33 @@ sampling-strategy = 0
 
 
 #XGBoost parameters medium - median optimized
-params.objective = "binary:logistic"
-params.eta = 0.0603
-params.max-depth = 10
-params.reg-lambda = 7.7710
-params.colsample-bytree = 0.7079
-params.subsample = 0.7619
-params.min-child-weight = 5
-params.gamma = 1.6447
-params.tree-method = "hist"
-params.eval-metric = "auc"
-params.nthread = 16
-params.seed = 42
-
-
-#XGBoost parameters medium - mean optimized
 # params.objective = "binary:logistic"
-# params.eta = 0.0561
-# params.max-depth = 8
-# params.reg-lambda = 22.04
-# params.colsample-bytree = 0.7587
-# params.subsample = 0.7820
+# params.eta = 0.0603
+# params.max-depth = 10
+# params.reg-lambda = 7.7710
+# params.colsample-bytree = 0.7079
+# params.subsample = 0.7619
 # params.min-child-weight = 5
-# params.gamma = 2.1233
+# params.gamma = 1.6447
 # params.tree-method = "hist"
 # params.eval-metric = "auc"
 # params.nthread = 16
 # params.seed = 42
+
+
+#XGBoost parameters medium - mean optimized
+params.objective = "binary:logistic"
+params.eta = 0.0561
+params.max-depth = 8
+params.reg-lambda = 22.04
+params.colsample-bytree = 0.7587
+params.subsample = 0.7820
+params.min-child-weight = 5
+params.gamma = 2.1233
+params.tree-method = "hist"
+params.eval-metric = "auc"
+params.nthread = 16
+params.seed = 42
 
 
 
