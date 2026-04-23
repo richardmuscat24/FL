@@ -154,7 +154,8 @@ def evaluate_on_combination(model_path, eval_banks, left_out_bank):
         'recall_optimal': recall_optimal,
         'best_threshold': best_thr,
         'num_examples': len(y_true),
-        'predictions': y_pred_proba
+        'predictions': y_pred_proba,
+        'y_true': y_true,
     }
 
 
@@ -186,9 +187,14 @@ def run_cross_evaluation(model_path, federation_type, output_csv=None, save_pred
         
         # Optionally save predictions
         if save_predictions:
-            pred_file = f"cross_eval_predictions_leftout_{left_out_bank}.npy"
-            np.save(pred_file, results['predictions'])
-            print(f"  💾 Predictions saved to: {pred_file}\n")
+            pred_file = f"exp2_federated_{left_out_bank}.npz"
+            np.savez(
+                pred_file,
+                y_prob=results['predictions'],
+                y_test=results['y_true'],
+                optimal_threshold=np.float32(results['best_threshold'])
+            )
+            print(f"  Predictions saved to: {pred_file}\n")
     
     # Save results to CSV
     if output_csv:
@@ -206,12 +212,11 @@ def run_cross_evaluation(model_path, federation_type, output_csv=None, save_pred
             writer.writeheader()
             
             for result in all_results:
-                # Remove predictions array before writing to CSV
-                row = {k: v for k, v in result.items() if k != 'predictions'}
+                row = {k: v for k, v in result.items() if k in fieldnames}
                 writer.writerow(row)
         
         print(f"\n{'='*70}")
-        print(f"✅ Results saved to: {output_path}")
+        print(f"Results saved to: {output_path}")
         print(f"{'='*70}\n")
     
     # Print summary
@@ -230,7 +235,7 @@ def run_cross_evaluation(model_path, federation_type, output_csv=None, save_pred
     # Calculate averages
     avg_auc_pr = np.mean([r['auc_pr'] for r in all_results])
     avg_f1_opt = np.mean([r['f1_optimal'] for r in all_results])
-    avg_f1_05 = np.mean([r['f1_05'] for r in all_results])
+    avg_f1_05  = np.mean([r['f1_05'] for r in all_results])
     
     print(f"{'-'*70}")
     print(f"{'AVERAGE':<10} {avg_auc_pr:<8.4f} {avg_f1_opt:<8.4f} {avg_f1_05:<8.4f}")
@@ -265,17 +270,15 @@ if __name__ == "__main__":
     parser.add_argument(
         '--save-predictions', '-s', 
         action='store_true',
-        help='Save prediction arrays for each combination'
+        help='Save npz prediction files for PR curve generation'
     )
     
     args = parser.parse_args()
     
-    # Auto-generate output filename if not provided
     if args.output is None:
         model_name = Path(args.model).stem
         args.output = f"metrics3/cross_eval_{model_name}_{args.federation}.csv"
     
-    # Run cross-evaluation
     run_cross_evaluation(
         model_path=args.model,
         federation_type=args.federation,
